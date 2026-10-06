@@ -1,87 +1,15 @@
-FROM node:20-slim
-
-# Pin the Codex CLI. Codex ships several releases a week; an unpinned build means
-# two deploys of the same commit can produce different agents. Bump deliberately.
-ARG CODEX_VERSION=0.149.1
-# ttyd — static single-binary web terminal (not packaged in Debian).
-ARG TTYD_VERSION=1.7.7
-
-# Tools a coding-agent box needs: git (clone/commit), gh (PRs/issues),
-# openssh-client (git over SSH), curl/ca-certs/gnupg (installers & TLS),
-# tmux (sessions that survive a dropped connection), bubblewrap (Codex's Linux
-# sandbox), locales (UTF-8 box-drawing in the TUI), less/ripgrep (agent quality
-# of life).
-RUN apt-get update && apt-get install -y --no-install-recommends \
-        git openssh-client ca-certificates curl gnupg \
-        tmux bubblewrap locales less ripgrep procps \
-    && rm -rf /var/lib/apt/lists/*
-
-# The Codex TUI is a ratatui app: without a UTF-8 locale its box-drawing
-# characters degrade to mojibake.
+FROM node:22-bookworm-slim@sha256:c3de60bf2f9dd0ac6370e6117950ff62d6e339527e7472301c9c78a017978392
+ARG CODEX_VERSION=0.160.1
+RUN apt-get update && apt-get install -y --no-install-recommends git openssh-client ca-certificates curl tmux locales python3 python3-venv shellcheck procps && rm -rf /var/lib/apt/lists/*
 RUN sed -i 's/^# *\(en_US.UTF-8\)/\1/' /etc/locale.gen && locale-gen
-ENV LANG=en_US.UTF-8 \
-    LC_ALL=en_US.UTF-8 \
-    TERM=xterm-256color
-
-# GitHub CLI — so the agent can `gh pr create`, `gh issue`, etc.
-RUN curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg \
-        -o /usr/share/keyrings/githubcli-archive-keyring.gpg \
-    && chmod 644 /usr/share/keyrings/githubcli-archive-keyring.gpg \
-    && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" \
-        > /etc/apt/sources.list.d/github-cli.list \
-    && apt-get update \
-    && apt-get install -y --no-install-recommends gh \
-    && rm -rf /var/lib/apt/lists/*
-
-# ttyd — serves the browser terminal on the public Railway domain.
-# Upstream publishes per-arch static binaries; map Debian arch names to theirs.
-RUN set -eux; \
-    case "$(dpkg --print-architecture)" in \
-        amd64) TTYD_ARCH=x86_64 ;; \
-        arm64) TTYD_ARCH=aarch64 ;; \
-        *) echo "unsupported arch: $(dpkg --print-architecture)" >&2; exit 1 ;; \
-    esac; \
-    curl -fsSL "https://github.com/tsl0922/ttyd/releases/download/${TTYD_VERSION}/ttyd.${TTYD_ARCH}" \
-        -o /usr/local/bin/ttyd; \
-    chmod +x /usr/local/bin/ttyd; \
-    ttyd --version
-
-# Codex CLI — OpenAI's coding agent. The npm package is a thin shim that pulls
-# the per-arch native binary via optionalDependencies.
-RUN npm install -g "@openai/codex@${CODEX_VERSION}" \
-    && codex --version
-
-# `codex login --device-auth` may try to open a browser via xdg-open; on a
-# headless container that throws a noisy (harmless) error. Shim it to a no-op so
-# the device code stays readable.
-RUN printf '#!/bin/sh\nexit 0\n' > /usr/local/bin/xdg-open \
-    && chmod +x /usr/local/bin/xdg-open
-
-# Default Codex config, seeded onto the volume on first boot only (never
-# overwrites your edits). See entrypoint.sh.
+ENV LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8 TERM=xterm-256color CODEX_HOME=/workspace/codex
+RUN npm install -g "@openai/codex@${CODEX_VERSION}" && codex --version && node --version && python3 --version
+RUN printf '#!/bin/sh\nexit 0\n' > /usr/local/bin/xdg-open && chmod 755 /usr/local/bin/xdg-open
 COPY config.toml.default /opt/codex/config.toml.default
-# tmux defaults: login shells (so /etc/profile.d is sourced) + mouse support,
-# which makes the browser terminal usable for scrolling and pane selection.
 COPY tmux.conf /root/.tmux.conf
-
-WORKDIR /workspace
 COPY entrypoint.sh /usr/local/bin/entrypoint.sh
-RUN chmod +x /usr/local/bin/entrypoint.sh
-
-# ttyd listens here; Railway maps the public domain to $PORT.
-ENV PORT=8080
-EXPOSE 8080
-
+COPY duo-dev /usr/local/bin/duo-dev
+RUN chmod 755 /usr/local/bin/entrypoint.sh /usr/local/bin/duo-dev && bash -n /usr/local/bin/entrypoint.sh && bash -n /usr/local/bin/duo-dev && shellcheck /usr/local/bin/entrypoint.sh /usr/local/bin/duo-dev
+WORKDIR /workspace
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
-# Main process = ttyd serving a tmux session on the public Railway domain
-# (basic-auth protected). `tmux new -A -s codex` attaches to the existing
-# session if there is one, so closing the browser tab never kills your work —
-# and `railway ssh --session codex` lands you in that *same* session.
-#
-# macOptionClickForcesSelection makes text selectable on macOS. tmux runs with
-# `mouse on`, so xterm.js hands drags to tmux instead of selecting text, and
-# xterm.js only overrides that for `shiftKey` off-Mac but for `altKey` AND this
-# option on Mac — which defaults to false. Without it a Mac user can highlight
-# (that's tmux's own selection, stuck in a server-side buffer) but never copy.
-# OSC 52 is not an alternative here: ttyd 1.7.7 registers no handler for it.
-CMD ["bash", "-lc", "exec ttyd --port ${PORT:-8080} --writable --credential \"${CODEX_WEB_USERNAME}:${CODEX_WEB_PASSWORD}\" -t fontSize=14 -t macOptionClickForcesSelection=true -t 'titleFixed=codex @ railway' tmux new -A -s codex"]
+CMD ["sleep", "infinity"]
