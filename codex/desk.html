@@ -4,98 +4,935 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="color-scheme" content="dark">
-  <title>AI 작업실</title>
+  <title>AI 작업실 / Studio</title>
   <style>
-    :root { --bg:#0b0e14; --surface:#111621; --surface2:#161d2a; --line:#273245; --text:#edf2f8; --muted:#8b98aa; --accent:#7c9cff; --accent2:#45d6a8; --danger:#ff7182; }
-    * { box-sizing:border-box; }
-    html,body { margin:0; min-width:0; height:100%; background:var(--bg); color:var(--text); font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI","Noto Sans KR",sans-serif; }
-    button,select { font:inherit; }
-    button:focus-visible,select:focus-visible,.splitter:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
-    .app { height:100vh; height:100dvh; min-height:0; display:flex; flex-direction:column; }
-    header { min-height:64px; display:flex; align-items:center; gap:18px; padding:10px 18px; border-bottom:1px solid var(--line); background:rgba(17,22,33,.96); position:relative; z-index:5; }
-    .brand { white-space:nowrap; font-weight:750; font-size:18px; letter-spacing:-.03em; }
-    .brand b { color:var(--accent2); margin-right:8px; }
-    .security { color:var(--muted); font-size:12px; margin-right:auto; white-space:nowrap; }
-    .controls { display:flex; align-items:center; gap:7px; flex-wrap:wrap; justify-content:flex-end; }
-    .control, .icon-btn { color:#cdd7e5; background:var(--surface2); border:1px solid var(--line); border-radius:7px; height:34px; padding:0 10px; cursor:pointer; }
-    .control:hover,.icon-btn:hover { border-color:#526581; background:#1b2636; color:#fff; }
-    .control[aria-pressed="true"] { color:#fff; background:#293a66; border-color:#6584dc; }
-    .icon-btn { width:34px; padding:0; font-size:17px; line-height:1; }
-    main { flex:1; min-height:0; padding:12px; }
-    .workspace { height:100%; min-height:0; display:flex; background:#080b10; border:1px solid var(--line); border-radius:10px; overflow:hidden; }
-    .workspace.rows { flex-direction:column; }
-    .pane { min-width:0; min-height:0; display:flex; flex-direction:column; background:var(--surface); overflow:hidden; }
-    .pane[hidden], .splitter[hidden] { display:none !important; }
-    .pane-head { height:44px; flex:none; display:flex; align-items:center; padding:0 10px 0 13px; gap:9px; border-bottom:1px solid var(--line); background:#141a25; }
-    .slot { font-size:11px; color:var(--muted); font-weight:700; letter-spacing:.08em; }
-    .agent-select { appearance:none; color:var(--text); background:#202a3a; border:1px solid #34445c; border-radius:6px; padding:5px 28px 5px 8px; cursor:pointer; font-size:13px; background-image:linear-gradient(45deg,transparent 50%,#9caec6 50%),linear-gradient(135deg,#9caec6 50%,transparent 50%); background-position:calc(100% - 13px) 10px,calc(100% - 9px) 10px; background-size:4px 4px; background-repeat:no-repeat; }
-    .pane-actions { margin-left:auto; display:flex; gap:5px; }
-    .pane-actions .icon-btn { height:29px; width:29px; font-size:15px; }
-    .frame-wrap { flex:1; min-height:0; position:relative; background:#090c12; }
-    iframe { display:block; width:100%; height:100%; border:0; background:#090c12; }
-    .loading { position:absolute; inset:0; display:grid; place-items:center; color:var(--muted); font-size:13px; pointer-events:none; }
-    .resizing iframe { pointer-events:none !important; }
-    .splitter { flex:0 0 8px; width:8px; background:var(--line); position:relative; border:0; padding:0; cursor:col-resize; touch-action:none; z-index:2; }
-    .splitter:hover,.splitter:focus-visible { background:var(--accent); }
-    .splitter::after { content:""; position:absolute; inset:0; margin:auto; width:3px; height:30px; border-radius:4px; background:#65738a; }
-    .rows .splitter { flex:0 0 8px; width:100%; height:8px; cursor:row-resize; }
-    .rows .splitter::after { width:30px; height:3px; }
-    .fullscreen .workspace { position:fixed; inset:0; z-index:20; height:auto; border-radius:0; border:0; }
-    .fullscreen main { padding:0; }
-    .fullscreen header { display:none; }
-    @media (max-width:720px) { header { min-height:unset; align-items:flex-start; flex-wrap:wrap; padding:10px 12px; gap:6px 12px; } .security { order:3; width:100%; white-space:normal; } .controls { margin-left:auto; } .control { padding:0 8px; } main { padding:8px; } .workspace:not(.rows) { flex-direction:column; } .workspace:not(.rows) .splitter { flex:0 0 8px; width:100%; height:8px; cursor:row-resize; } .workspace:not(.rows) .splitter::after { width:30px; height:3px; } }
+    :root {
+      --bg: #080a0f;
+      --panel: #0e121a;
+      --panel-2: #141a24;
+      --panel-3: #192231;
+      --line: #263143;
+      --line-strong: #3b4b65;
+      --text: #edf2f8;
+      --muted: #8d9aab;
+      --faint: #5e6a7a;
+      --accent: #8aa4ff;
+      --accent-2: #54d6b2;
+      --accent-soft: rgba(138, 164, 255, .14);
+      --danger: #ff8090;
+      --warning: #e8bb68;
+      --shadow: 0 18px 55px rgba(0,0,0,.42), 0 2px 10px rgba(0,0,0,.28);
+      --radius: 12px;
+      --sidebar: 224px;
+    }
+    * { box-sizing: border-box; }
+    html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; background: var(--bg); color: var(--text); font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", "Noto Sans KR", sans-serif; }
+    button, input, select, textarea { font: inherit; }
+    button, select, input[type="checkbox"] { cursor: pointer; }
+    button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, [tabindex]:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    button { color: inherit; }
+    [hidden] { display: none !important; }
+
+    #app { height: 100vh; height: 100dvh; min-width: 0; display: grid; grid-template-rows: 58px minmax(0,1fr) 32px; background: radial-gradient(circle at 70% -20%, rgba(88,113,190,.15), transparent 42%), var(--bg); }
+    .topbar { z-index: 30; display: flex; align-items: center; gap: 14px; padding: 0 16px; border-bottom: 1px solid var(--line); background: rgba(11,14,21,.94); backdrop-filter: blur(16px); }
+    .brand { display: flex; align-items: center; min-width: max-content; gap: 10px; font-size: 15px; font-weight: 780; letter-spacing: -.025em; }
+    .brand-mark { width: 9px; height: 9px; border-radius: 50%; background: var(--accent-2); box-shadow: 0 0 0 5px rgba(84,214,178,.09), 0 0 18px rgba(84,214,178,.45); }
+    .brand small { color: var(--muted); font-size: 12px; font-weight: 600; letter-spacing: .03em; }
+    .preset-bar { display: flex; align-items: center; gap: 4px; padding: 3px; border: 1px solid var(--line); border-radius: 9px; background: #0b0f16; }
+    .preset, .tool-button, .small-button, .window-button, .palette-button { border: 1px solid transparent; background: transparent; border-radius: 7px; transition: background .16s, border-color .16s, color .16s, transform .16s; }
+    .preset { min-height: 30px; padding: 0 10px; color: var(--muted); font-size: 12px; font-weight: 650; white-space: nowrap; }
+    .preset:hover, .preset[aria-pressed="true"] { color: var(--text); border-color: #34435b; background: #1a2230; }
+    .top-spacer { flex: 1; }
+    .workspace-name { width: min(190px, 18vw); height: 33px; border: 1px solid var(--line); border-radius: 8px; padding: 0 10px; color: var(--text); background: #0e131c; }
+    .workspace-name::placeholder { color: var(--faint); }
+    .tool-button { min-height: 33px; padding: 0 10px; border-color: var(--line); color: #c8d1de; background: #121823; font-size: 12px; font-weight: 650; white-space: nowrap; }
+    .tool-button:hover, .small-button:hover, .window-button:hover { border-color: var(--line-strong); background: #1b2636; color: #fff; }
+    .tool-button.primary { color: #eff3ff; border-color: #536ba4; background: #26375f; }
+    .tool-button.primary:hover { background: #304574; }
+
+    .body { min-height: 0; min-width: 0; display: grid; grid-template-columns: var(--sidebar) minmax(0,1fr); }
+    .sidebar { z-index: 20; min-height: 0; overflow: auto; padding: 14px 12px; border-right: 1px solid var(--line); background: linear-gradient(180deg, #0f141d, #0c1017); }
+    .side-section + .side-section { margin-top: 18px; padding-top: 17px; border-top: 1px solid #202a39; }
+    .section-label { margin: 0 0 9px 4px; color: var(--faint); font-size: 10px; font-weight: 800; letter-spacing: .13em; text-transform: uppercase; }
+    .palette { display: grid; gap: 7px; }
+    .palette-button { width: 100%; min-height: 42px; display: flex; align-items: center; gap: 10px; padding: 7px 10px; border-color: #222e3f; text-align: left; background: #111722; }
+    .palette-button:hover { border-color: #435675; background: #182231; transform: translateY(-1px); }
+    .palette-key { flex: none; width: 27px; height: 27px; display: grid; place-items: center; border-radius: 7px; color: #dce5ff; background: #222e4d; font-size: 10px; font-weight: 850; }
+    .palette-button:nth-child(2) .palette-key { color: #d6fff2; background: #183d35; }
+    .palette-button:nth-child(3) .palette-key { color: #fff1cf; background: #43351d; }
+    .palette-button:nth-child(4) .palette-key { color: #f1dcff; background: #39264b; }
+    .palette-button span:last-child { min-width: 0; }
+    .palette-button strong { display: block; font-size: 12px; }
+    .palette-button small { display: block; margin-top: 2px; color: var(--muted); font-size: 10px; }
+    .side-row { display: flex; align-items: center; gap: 8px; }
+    .side-row + .side-row { margin-top: 8px; }
+    .side-select { min-width: 0; flex: 1; height: 33px; border: 1px solid var(--line); border-radius: 7px; padding: 0 7px; color: #d8e0ec; background: #121923; }
+    .small-button { min-height: 31px; padding: 0 9px; border-color: var(--line); color: #bfc9d7; background: #121923; font-size: 11px; }
+    .small-button.danger:hover { color: #ffd9de; border-color: #78404a; background: #341c22; }
+    .switch-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; color: #c2ccd9; font-size: 12px; }
+    .switch-row input { width: 17px; height: 17px; accent-color: var(--accent); }
+    .side-help { margin: 9px 3px 0; color: var(--faint); font-size: 10px; line-height: 1.55; }
+
+    .stage { min-width: 0; min-height: 0; position: relative; overflow: hidden; background: #090c12; }
+    #canvas { position: absolute; inset: 0; overflow: hidden; background-color: #090c12; background-image: linear-gradient(rgba(113,135,170,.045) 1px, transparent 1px), linear-gradient(90deg, rgba(113,135,170,.045) 1px, transparent 1px), radial-gradient(circle at 45% 10%, rgba(83,111,176,.09), transparent 44%); background-size: 24px 24px, 24px 24px, auto; }
+    #canvas.snap-on { background-image: linear-gradient(rgba(125,151,194,.09) 1px, transparent 1px), linear-gradient(90deg, rgba(125,151,194,.09) 1px, transparent 1px), radial-gradient(circle at 45% 10%, rgba(83,111,176,.09), transparent 44%); }
+    .empty-tip { position: absolute; inset: 0; display: grid; place-items: center; pointer-events: none; }
+    .empty-card { max-width: 390px; padding: 24px 28px; border: 1px dashed #2e3a4c; border-radius: 15px; color: var(--muted); text-align: center; background: rgba(13,18,26,.72); }
+    .empty-card strong { display: block; margin-bottom: 7px; color: #cdd6e3; font-size: 14px; }
+    .empty-card span { font-size: 12px; line-height: 1.65; }
+
+    .studio-window { position: absolute; min-width: 280px; min-height: 180px; display: flex; flex-direction: column; overflow: hidden; border: 1px solid #2c394c; border-radius: var(--radius); background: var(--panel); box-shadow: var(--shadow); transform: translateZ(0); }
+    .studio-window.is-active { border-color: #52698d; box-shadow: 0 22px 68px rgba(0,0,0,.52), 0 0 0 1px rgba(138,164,255,.09); }
+    .studio-window.is-focused { inset: 14px !important; width: auto !important; height: auto !important; border-color: #637eab; border-radius: 10px; }
+    .studio-window.is-minimized { display: none; }
+    .window-titlebar { flex: none; height: 42px; display: flex; align-items: center; gap: 8px; padding: 0 7px 0 11px; border-bottom: 1px solid var(--line); background: linear-gradient(180deg, #18202c, #141b25); cursor: grab; touch-action: none; user-select: none; }
+    .window-titlebar:active { cursor: grabbing; }
+    .window-dot { flex: none; width: 7px; height: 7px; border-radius: 50%; background: #64748a; }
+    [data-kind="terminal"] .window-dot { background: var(--accent-2); box-shadow: 0 0 10px rgba(84,214,178,.42); }
+    [data-kind="note"] .window-dot { background: var(--warning); }
+    [data-kind="checklist"] .window-dot { background: var(--accent); }
+    [data-kind="html"] .window-dot { background: #c88cff; }
+    .window-heading { min-width: 0; display: flex; align-items: baseline; gap: 7px; }
+    .window-title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; font-weight: 760; }
+    .window-meta { color: var(--faint); font-size: 9px; font-weight: 800; letter-spacing: .08em; }
+    .titlebar-spacer { flex: 1; }
+    .agent-select { height: 26px; max-width: 92px; border: 1px solid #35445b; border-radius: 6px; padding: 0 5px; color: #dce5f1; background: #111722; font-size: 10px; }
+    .window-actions { display: flex; align-items: center; gap: 3px; }
+    .window-button { min-height: 25px; padding: 0 7px; border-color: #2c394c; color: #aeb9c8; background: rgba(12,16,23,.45); font-size: 10px; white-space: nowrap; }
+    .window-button.close:hover { color: #ffd5da; border-color: #713b45; background: #321b20; }
+    .window-content { position: relative; flex: 1; min-height: 0; overflow: auto; background: #0c1017; }
+    .terminal-wrap { height: 100%; position: relative; overflow: hidden; background: #080b10; }
+    .terminal-frame, .widget-frame { display: block; width: 100%; height: 100%; border: 0; background: #080b10; }
+    .frame-loading { position: absolute; inset: 0; display: grid; place-items: center; color: var(--muted); font: 11px ui-monospace, SFMono-Regular, Consolas, monospace; pointer-events: none; background: #090c12; }
+    .demo-chip { position: absolute; right: 9px; bottom: 8px; z-index: 2; padding: 3px 6px; border: 1px solid #68532b; border-radius: 5px; color: #efc56f; background: rgba(40,31,15,.9); font-size: 9px; font-weight: 800; letter-spacing: .08em; pointer-events: none; }
+    .interacting iframe { pointer-events: none !important; }
+    .resize-handle { position: absolute; z-index: 5; right: 0; bottom: 0; width: 22px; height: 22px; border: 0; border-radius: 8px 0 0 0; padding: 0; color: transparent; background: linear-gradient(135deg, transparent 0 48%, #71819a 49% 55%, transparent 56% 64%, #71819a 65% 71%, transparent 72%); cursor: nwse-resize; touch-action: none; }
+    .resize-handle:focus-visible { color: transparent; background-color: rgba(138,164,255,.16); }
+
+    .note-area { width: 100%; height: 100%; resize: none; border: 0; outline: 0; padding: 16px; color: #dce4ef; background: #10151e; font-size: 13px; line-height: 1.7; }
+    .note-area::placeholder { color: #596678; }
+    .checklist-panel { height: 100%; display: flex; flex-direction: column; padding: 12px; }
+    .check-add { display: flex; gap: 7px; padding-bottom: 10px; border-bottom: 1px solid #212b39; }
+    .check-add input { min-width: 0; flex: 1; height: 32px; border: 1px solid var(--line); border-radius: 7px; padding: 0 9px; color: var(--text); background: #131a24; }
+    .check-list { min-height: 0; flex: 1; overflow: auto; padding: 8px 0; }
+    .check-item { display: grid; grid-template-columns: 20px minmax(0,1fr) auto; align-items: center; gap: 6px; min-height: 34px; padding: 3px 2px; }
+    .check-item input[type="checkbox"] { accent-color: var(--accent-2); }
+    .check-item input[type="text"] { min-width: 0; border: 0; border-bottom: 1px solid transparent; padding: 4px 2px; color: #d9e1ec; background: transparent; }
+    .check-item input[type="text"]:focus { border-bottom-color: #536b91; outline: 0; }
+    .check-item.done input[type="text"] { color: #6f7b8a; text-decoration: line-through; }
+    .check-delete { border: 0; padding: 5px 7px; color: #7f8a99; background: transparent; font-size: 10px; }
+    .check-delete:hover { color: var(--danger); }
+    .html-panel { height: 100%; display: grid; grid-template-rows: minmax(100px, 42%) 38px minmax(0,1fr); }
+    .html-editor { width: 100%; height: 100%; resize: none; border: 0; border-bottom: 1px solid var(--line); outline: 0; padding: 12px; color: #ccd8e8; background: #0b0f16; font: 11px/1.55 ui-monospace, SFMono-Regular, Consolas, monospace; tab-size: 2; }
+    .html-tools { display: flex; align-items: center; gap: 7px; padding: 0 9px; border-bottom: 1px solid var(--line); background: #121923; }
+    .html-tools span { min-width: 0; flex: 1; overflow: hidden; color: var(--muted); font-size: 9px; text-overflow: ellipsis; white-space: nowrap; }
+    .widget-wrap { min-height: 0; background: #fff; }
+
+    .minimize-tray { position: absolute; z-index: 120; left: 12px; right: 12px; bottom: 10px; display: flex; align-items: center; gap: 6px; pointer-events: none; }
+    .tray-label { color: #718095; font-size: 9px; font-weight: 800; letter-spacing: .1em; }
+    .tray-button { pointer-events: auto; max-width: 180px; height: 30px; overflow: hidden; border: 1px solid #344258; border-radius: 7px; padding: 0 10px; color: #cbd5e2; text-overflow: ellipsis; white-space: nowrap; background: rgba(19,26,36,.94); font-size: 10px; }
+    .tray-button:hover { border-color: #58709a; background: #202c3e; }
+
+    .statusbar { z-index: 30; display: flex; align-items: center; gap: 16px; padding: 0 14px; border-top: 1px solid var(--line); color: #788699; background: #0b0f16; font-size: 10px; }
+    .status-item { display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+    .status-light { width: 6px; height: 6px; border-radius: 50%; background: var(--accent-2); }
+    .status-spacer { flex: 1; }
+
+    dialog { width: min(480px, calc(100vw - 28px)); border: 1px solid #39485f; border-radius: 14px; padding: 0; color: var(--text); background: #111722; box-shadow: 0 30px 90px rgba(0,0,0,.65); }
+    dialog::backdrop { background: rgba(2,4,8,.72); backdrop-filter: blur(4px); }
+    .dialog-head { display: flex; align-items: center; justify-content: space-between; padding: 15px 17px; border-bottom: 1px solid var(--line); }
+    .dialog-head h2 { margin: 0; font-size: 14px; }
+    .dialog-body { padding: 17px; color: #bdc7d4; font-size: 12px; line-height: 1.65; }
+    .dialog-body strong { color: #eef2f7; }
+    .dialog-foot { display: flex; justify-content: flex-end; padding: 12px 17px; border-top: 1px solid var(--line); }
+
+    @media (max-width: 900px) {
+      :root { --sidebar: 184px; }
+      .workspace-name { display: none; }
+      .topbar { gap: 8px; padding: 0 10px; }
+      .preset { padding: 0 7px; }
+      .tool-button.secondary { display: none; }
+    }
+    @media (max-width: 680px) {
+      html, body { overflow: auto; }
+      #app { min-height: 100dvh; height: auto; grid-template-rows: auto auto minmax(calc(100dvh - 164px), auto) 34px; overflow-x: hidden; }
+      .topbar { min-height: 96px; align-content: center; flex-wrap: wrap; padding: 9px 10px; }
+      .brand { width: 100%; }
+      .preset-bar { max-width: 100%; overflow-x: auto; }
+      .top-spacer { display: none; }
+      .tool-button { min-height: 30px; }
+      .body { display: contents; }
+      .sidebar { min-height: auto; display: flex; gap: 8px; overflow-x: auto; padding: 8px 10px; border-right: 0; border-bottom: 1px solid var(--line); }
+      .side-section { display: flex; flex: none; gap: 7px; margin: 0 !important; padding: 0 !important; border: 0 !important; }
+      .section-label, .side-help, .side-section:nth-child(n+2) { display: none; }
+      .palette { display: flex; gap: 7px; }
+      .palette-button { width: auto; min-width: 112px; min-height: 38px; }
+      .palette-button small { display: none; }
+      .stage { min-height: calc(100dvh - 164px); overflow: visible; }
+      #canvas { position: relative; inset: auto; min-height: calc(100dvh - 164px); overflow: visible; padding: 8px; background-size: 20px 20px; }
+      .studio-window, .studio-window.is-focused { position: relative !important; inset: auto !important; left: auto !important; top: auto !important; width: 100% !important; height: min(64vh, 520px) !important; min-width: 0; margin: 0 0 9px; border-radius: 10px; }
+      .studio-window.is-focused { height: calc(100dvh - 184px) !important; }
+      #canvas.has-focus .studio-window:not(.is-focused), #canvas.has-focus .empty-tip { display: none !important; }
+      .window-titlebar { height: 45px; padding-left: 9px; }
+      .window-meta, .resize-handle { display: none; }
+      .window-button { padding: 0 6px; }
+      .minimize-tray { position: sticky; left: 8px; right: 8px; bottom: 7px; margin-top: 8px; }
+      .statusbar { position: sticky; bottom: 0; overflow: hidden; }
+      .statusbar .shortcut-status { display: none; }
+    }
+    @media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; transition: none !important; } }
   </style>
 </head>
 <body>
-  <div class="app" id="app">
-    <header>
-      <div class="brand"><b>●</b>AI 작업실</div>
-      <div class="security">승인/계정은 각 CLI에서 관리</div>
-      <div class="controls" aria-label="레이아웃 제어">
-        <button class="control" id="columns" type="button" aria-pressed="true">열</button>
-        <button class="control" id="rows" type="button" aria-pressed="false">행</button>
-        <button class="control" id="two" type="button" aria-pressed="true">2 패널</button>
-        <button class="control" id="three" type="button" aria-pressed="false">3 패널</button>
-        <button class="control" id="reset" type="button">초기화</button>
-      </div>
+  <div id="app">
+    <header class="topbar">
+      <div class="brand"><span class="brand-mark" aria-hidden="true"></span><span>AI 작업실 <small>/ Studio</small></span></div>
+      <nav class="preset-bar" aria-label="배치 프리셋">
+        <button class="preset" type="button" data-preset="free" aria-pressed="true">자유 배치</button>
+        <button class="preset" type="button" data-preset="side" aria-pressed="false">나란히</button>
+        <button class="preset" type="button" data-preset="grid" aria-pressed="false">격자</button>
+        <button class="preset" type="button" data-preset="focus" aria-pressed="false">집중</button>
+      </nav>
+      <div class="top-spacer"></div>
+      <input class="workspace-name" id="workspaceName" maxlength="48" aria-label="현재 작업공간 이름" placeholder="작업공간 이름">
+      <button class="tool-button primary" id="saveWorkspace" type="button">현재 이름으로 저장</button>
+      <button class="tool-button secondary" id="exportWorkspace" type="button">내보내기</button>
+      <button class="tool-button" id="settingsButton" type="button">설정</button>
     </header>
-    <main>
-      <section class="workspace" id="workspace" aria-label="터미널 작업 영역">
-        <article class="pane" data-slot="1"><div class="pane-head"><span class="slot">SLOT 1</span><select class="agent-select" aria-label="슬롯 1 에이전트"><option value="codex">Codex</option><option value="claude">Claude</option><option value="shell">Shell</option></select><div class="pane-actions"><button class="icon-btn reconnect" title="다시 연결" aria-label="슬롯 1 다시 연결">↻</button><button class="icon-btn expand" title="전체 화면" aria-label="슬롯 1 전체 화면">⛶</button></div></div><div class="frame-wrap"><div class="loading">터미널 준비 중…</div></div></article>
-        <button class="splitter" type="button" aria-label="패널 크기 조절" aria-orientation="vertical" tabindex="0"></button>
-        <article class="pane" data-slot="2"><div class="pane-head"><span class="slot">SLOT 2</span><select class="agent-select" aria-label="슬롯 2 에이전트"><option value="codex">Codex</option><option value="claude">Claude</option><option value="shell">Shell</option></select><div class="pane-actions"><button class="icon-btn reconnect" title="다시 연결" aria-label="슬롯 2 다시 연결">↻</button><button class="icon-btn expand" title="전체 화면" aria-label="슬롯 2 전체 화면">⛶</button></div></div><div class="frame-wrap"><div class="loading">터미널 준비 중…</div></div></article>
-        <button class="splitter" type="button" aria-label="패널 크기 조절" aria-orientation="vertical" tabindex="0"></button>
-        <article class="pane" data-slot="3"><div class="pane-head"><span class="slot">SLOT 3</span><select class="agent-select" aria-label="슬롯 3 에이전트"><option value="codex">Codex</option><option value="claude">Claude</option><option value="shell">Shell</option></select><div class="pane-actions"><button class="icon-btn reconnect" title="다시 연결" aria-label="슬롯 3 다시 연결">↻</button><button class="icon-btn expand" title="전체 화면" aria-label="슬롯 3 전체 화면">⛶</button></div></div><div class="frame-wrap"><div class="loading">터미널 준비 중…</div></div></article>
-      </section>
-    </main>
+
+    <div class="body">
+      <aside class="sidebar" aria-label="기능 팔레트">
+        <section class="side-section">
+          <h2 class="section-label">Feature palette</h2>
+          <div class="palette">
+            <button class="palette-button" type="button" data-add="terminal"><span class="palette-key">T</span><span><strong>터미널</strong><small>Codex, Claude, Shell</small></span></button>
+            <button class="palette-button" type="button" data-add="note"><span class="palette-key">N</span><span><strong>로컬 메모</strong><small>브라우저에만 저장</small></span></button>
+            <button class="palette-button" type="button" data-add="checklist"><span class="palette-key">C</span><span><strong>체크리스트</strong><small>가벼운 작업 추적</small></span></button>
+            <button class="palette-button" type="button" data-add="html"><span class="palette-key">H</span><span><strong>HTML 위젯</strong><small>격리된 브라우저 미리보기</small></span></button>
+          </div>
+        </section>
+        <section class="side-section">
+          <h2 class="section-label">Saved layouts</h2>
+          <div class="side-row">
+            <select class="side-select" id="savedLayouts" aria-label="저장된 작업공간"><option value="">저장된 작업공간</option></select>
+          </div>
+          <div class="side-row">
+            <button class="small-button" id="loadLayout" type="button">불러오기</button>
+            <button class="small-button danger" id="deleteLayout" type="button">삭제</button>
+          </div>
+        </section>
+        <section class="side-section">
+          <h2 class="section-label">Canvas</h2>
+          <label class="switch-row" for="snapToggle"><span>24px 격자 맞춤</span><input id="snapToggle" type="checkbox"></label>
+          <p class="side-help">창 제목줄을 드래그하거나 방향키로 이동합니다. 우측 아래 크기 핸들도 방향키를 지원합니다.</p>
+        </section>
+        <section class="side-section">
+          <h2 class="section-label">Transfer</h2>
+          <div class="side-row">
+            <button class="small-button" id="importWorkspace" type="button">JSON 가져오기</button>
+            <input id="importFile" type="file" accept="application/json,.json" hidden>
+          </div>
+        </section>
+      </aside>
+
+      <main class="stage" aria-label="데스크톱 작업 캔버스">
+        <section id="canvas" aria-label="AI 작업실 캔버스">
+          <div class="empty-tip" id="emptyTip" hidden>
+            <div class="empty-card"><strong>작업 창을 추가해 보세요</strong><span>왼쪽 팔레트에서 터미널, 메모, 체크리스트 또는 HTML 위젯을 추가할 수 있습니다.</span></div>
+          </div>
+          <div class="minimize-tray" id="minimizeTray" aria-label="최소화된 창"></div>
+        </section>
+      </main>
+    </div>
+
+    <footer class="statusbar">
+      <div class="status-item"><span class="status-light" aria-hidden="true"></span><span id="statusText">로컬 작업공간 준비됨</span></div>
+      <div class="status-item" id="windowCount">창 0개</div>
+      <div class="status-spacer"></div>
+      <div class="status-item shortcut-status">단축키: Alt+T 터미널 · Alt+N 메모 · Esc 집중 해제</div>
+      <div class="status-item">승인과 계정은 각 CLI에서 관리</div>
+    </footer>
   </div>
+
+  <dialog id="settingsDialog" aria-labelledby="settingsTitle">
+    <div class="dialog-head"><h2 id="settingsTitle">작업실 설정과 안내</h2><button class="small-button" type="button" data-close-dialog>닫기</button></div>
+    <div class="dialog-body">
+      <p><strong>HTML 위젯은 브라우저 전용입니다.</strong> 서버 셸이나 네이티브 Claude Code Mod가 아닙니다. 위젯은 <code>allow-scripts</code>만 허용한 sandbox iframe에서 실행되며 네트워크 연결, 상위 페이지 접근, 폼 전송, 외부 프레임을 CSP로 차단합니다.</p>
+      <p>Native Mods 호환 기준은 2.1.291, 최소 2.1.287이지만 이 화면이 Mods 설치 상태를 의미하지는 않습니다. 현재 HTML 위젯은 설치형 Mod와 분리된 기능입니다.</p>
+      <p>Claude 슬롯은 공개 데이터 작업 경로를 전제로 표시합니다. 인증 상태는 이 화면에 저장하거나 추정하지 않으며 각 CLI에서 별도로 확인합니다.</p>
+      <p>터미널 창을 닫아도 화면에서만 분리되며 서버의 터미널 세션을 종료하지 않습니다. 에이전트 변경과 다시 연결에서만 해당 iframe을 다시 탐색합니다.</p>
+      <label class="switch-row" for="dialogSnapToggle"><span>24px 격자 맞춤 사용</span><input id="dialogSnapToggle" type="checkbox"></label>
+    </div>
+    <div class="dialog-foot"><button class="tool-button primary" type="button" data-close-dialog>확인</button></div>
+  </dialog>
+
   <script>
   (() => {
     'use strict';
-    const key='ai-workshop-layout-v1', qs=(s,r=document)=>r.querySelector(s), qsa=(s,r=document)=>[...r.querySelectorAll(s)];
-    const ws=qs('#workspace'), app=qs('#app'), panes=qsa('.pane'), splits=qsa('.splitter');
-    const safe=v=>['codex','claude','shell'].includes(v)?v:'shell';
-    const normalize=(values,count)=>{const fallback=100/count;let out=Array.from({length:count},(_,i)=>Number(values?.[i])>0?Number(values[i]):fallback);const sum=out.reduce((a,b)=>a+b,0);return out.map(v=>v/sum*100);};
-    const fresh=()=>({direction:'columns',count:2,roles:['codex','claude','shell'],ratios:[50,50],sizes:{2:[50,50],3:[100/3,100/3,100/3]}});
-    function load(){const base=fresh();try{const raw=JSON.parse(localStorage.getItem(key));if(!raw||typeof raw!=='object')return base;const count=raw.count===3?3:2, direction=raw.direction==='rows'?'rows':'columns',roles=Array.from({length:3},(_,i)=>safe(raw.roles?.[i]??base.roles[i]));const sizes={2:normalize(raw.sizes?.[2]??(count===2?raw.ratios:base.sizes[2]),2),3:normalize(raw.sizes?.[3]??(count===3?raw.ratios:base.sizes[3]),3)};return {direction,count,roles,ratios:[...sizes[count]],sizes};}catch(e){return base;}}
-    let state=load(), fullscreenSlot=null, dragActive=false;
-    const demo=new URLSearchParams(location.search).get('demo')==='1';
-    const save=()=>{try{localStorage.setItem(key,JSON.stringify({direction:state.direction,count:state.count,roles:state.roles,ratios:state.ratios,sizes:state.sizes}));}catch(e){/* Storage can be disabled; layout still works for this visit. */}};
-    const mock=(slot,agent)=>`<!doctype html><style>body{margin:0;padding:18px;background:#090c12;color:#cfdae9;font:13px ui-monospace,monospace;line-height:1.7}.m{color:#48d9a9}.b{color:#8da8ff}.dim{color:#72829a}</style><div><span class=m>●</span> ${agent} <span class=dim>· 슬롯 ${slot} · 데모 미리보기</span><br><br><span class=b>workstation</span>:~$ ${agent==='shell'?'pwd':'도움말을 입력하세요'}<br><span class=dim>${agent==='shell'?'/workspace':'연결 대기 중'}</span><br><br><span class=m>준비됨</span><span class=dim> · 실제 터미널은 배포 환경에서 연결됩니다.</span></div>`;
-    function setFrame(pane,agent){const slot=pane.dataset.slot,frame=qs('iframe',pane);if(!frame)return;frame.title=`슬롯 ${slot} ${agent} 터미널`;if(demo)frame.srcdoc=mock(slot,agent);else frame.src=`/terminal/${slot}/${agent}/`;}
-    function createFrame(pane){if(qs('iframe',pane))return;const agent=safe(qs('select',pane).value),frame=document.createElement('iframe');frame.title=`슬롯 ${pane.dataset.slot} ${agent} 터미널`;frame.setAttribute('loading','lazy');if(demo)frame.srcdoc=mock(pane.dataset.slot,agent);else frame.src=`/terminal/${pane.dataset.slot}/${agent}/`;frame.addEventListener('load',()=>qs('.loading',pane)?.remove(),{once:true});qs('.frame-wrap',pane).append(frame);}
-    function visibleFrames(){panes.slice(0,state.count).forEach(createFrame);}
-    function apply(){ws.classList.toggle('rows',state.direction==='rows');panes.forEach((p,i)=>{const visible=fullscreenSlot===null?i<state.count:i===fullscreenSlot;p.hidden=!visible;p.style.flex=(fullscreenSlot===i?'1 1 0':`${state.ratios[i]||100/state.count} 1 0`);qs('select',p).value=safe(state.roles[i]);});splits.forEach((s,i)=>{s.hidden=fullscreenSlot!==null||i>=state.count-1;s.setAttribute('aria-orientation',state.direction==='rows'?'horizontal':'vertical');});qs('#columns').setAttribute('aria-pressed',String(state.direction==='columns'));qs('#rows').setAttribute('aria-pressed',String(state.direction==='rows'));qs('#two').setAttribute('aria-pressed',String(state.count===2));qs('#three').setAttribute('aria-pressed',String(state.count===3));visibleFrames();save();}
-    function setRatios(index,delta){const a=state.ratios[index],b=state.ratios[index+1],total=a+b,next=Math.max(12,Math.min(total-12,a+delta));state.ratios[index]=next;state.ratios[index+1]=total-next;state.sizes[state.count]=[...state.ratios];apply();}
-    function beginDrag(e,index,isPointer){if(dragActive)return;dragActive=true;e.preventDefault();const row=ws.classList.contains('rows')||innerWidth<=720,rect=ws.getBoundingClientRect(),start=row?e.clientY:e.clientX,size=row?rect.height:rect.width,a=state.ratios[index],b=state.ratios[index+1],total=a+b,previousCursor=document.body.style.cursor,previousSelect=document.documentElement.style.userSelect;app.classList.add('resizing');document.body.style.cursor=row?'row-resize':'col-resize';document.documentElement.style.userSelect='none';if(isPointer){try{e.currentTarget.setPointerCapture(e.pointerId);}catch(err){}}const move=ev=>{const next=Math.max(12,Math.min(total-12,a+((row?ev.clientY:ev.clientX)-start)/size*100));state.ratios[index]=next;state.ratios[index+1]=total-next;state.sizes[state.count]=[...state.ratios];apply();};const end=()=>{dragActive=false;app.classList.remove('resizing');document.body.style.cursor=previousCursor;document.documentElement.style.userSelect=previousSelect;window.removeEventListener(isPointer?'pointermove':'mousemove',move);window.removeEventListener(isPointer?'pointerup':'mouseup',end);window.removeEventListener('pointercancel',end);window.removeEventListener('blur',end);};window.addEventListener(isPointer?'pointermove':'mousemove',move);window.addEventListener(isPointer?'pointerup':'mouseup',end);if(isPointer)window.addEventListener('pointercancel',end);window.addEventListener('blur',end);}
-    function switchCount(count){state.sizes[state.count]=normalize(state.ratios,state.count);state.count=count;state.ratios=normalize(state.sizes[count],count);apply();}
-    qsa('.splitter').forEach((s,i)=>{s.addEventListener('pointerdown',e=>beginDrag(e,i,true));s.addEventListener('mousedown',e=>beginDrag(e,i,false));s.addEventListener('keydown',e=>{if(!['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(e.key))return;e.preventDefault();setRatios(i,['ArrowLeft','ArrowUp'].includes(e.key)?-3:3);});});
-    qsa('.agent-select').forEach((sel,i)=>sel.addEventListener('change',()=>{const agent=safe(sel.value);state.roles[i]=agent;setFrame(panes[i],agent);save();}));
-    qsa('.reconnect').forEach((b,i)=>b.addEventListener('click',()=>setFrame(panes[i],safe(state.roles[i]))));
-    qsa('.expand').forEach((b,i)=>b.addEventListener('click',()=>{fullscreenSlot=fullscreenSlot===i?null:i;app.classList.toggle('fullscreen',fullscreenSlot!==null);qsa('.expand').forEach((x,n)=>{x.textContent=fullscreenSlot===n?'⤢':'⛶';x.setAttribute('aria-label',fullscreenSlot===n?'전체 화면 닫기':`슬롯 ${n+1} 전체 화면`);});apply();}));
-    window.addEventListener('keydown',e=>{if(e.key==='Escape'&&fullscreenSlot!==null){fullscreenSlot=null;app.classList.remove('fullscreen');qsa('.expand').forEach((x,i)=>{x.textContent='⛶';x.setAttribute('aria-label',`슬롯 ${i+1} 전체 화면`);});apply();}});
-    qs('#columns').onclick=()=>{state.direction='columns';apply();};qs('#rows').onclick=()=>{state.direction='rows';apply();};qs('#two').onclick=()=>switchCount(2);qs('#three').onclick=()=>switchCount(3);qs('#reset').onclick=()=>{state=fresh();fullscreenSlot=null;app.classList.remove('fullscreen');apply();};
-    apply();
+
+    const STORE_KEY = 'ai-studio-schema-v2';
+    const SAVED_KEY = 'ai-studio-saved-v2';
+    const LEGACY_KEY = 'ai-workshop-layout-v1';
+    const VERSION = 2;
+    const MAX_WINDOWS = 24;
+    const MAX_TERMINALS = 8;
+    const GRID = 24;
+    const demo = new URLSearchParams(location.search).get('demo') === '1'; // Preview option: replace this expression with true.
+    const allowedKinds = new Set(['terminal', 'note', 'checklist', 'html']);
+    const allowedAgents = new Set(['codex', 'claude', 'shell']);
+    const $ = (selector, root = document) => root.querySelector(selector);
+    const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
+    const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
+    const boundedString = (value, max, fallback = '') => typeof value === 'string' ? value.slice(0, max) : fallback;
+    const safeId = value => typeof value === 'string' && /^[a-z0-9][a-z0-9_-]{0,47}$/i.test(value) ? value : null;
+    const canvas = $('#canvas');
+    const tray = $('#minimizeTray');
+    const app = $('#app');
+    const domById = new Map();
+    let activeId = null;
+    let interaction = null;
+    let lastPointerAt = 0;
+    let sequence = 0;
+    let persistTimer = 0;
+
+    function defaultWindows(roles = ['codex', 'claude', 'shell']) {
+      return [
+        { id: 'terminal-1', kind: 'terminal', title: 'Codex', slot: 1, agent: roles[0] || 'codex', x: 34, y: 32, w: 540, h: 390, z: 3, minimized: false },
+        { id: 'terminal-2', kind: 'terminal', title: 'Claude', slot: 2, agent: roles[1] || 'claude', x: 315, y: 92, w: 540, h: 390, z: 2, minimized: false },
+        { id: 'terminal-3', kind: 'terminal', title: 'Shell', slot: 3, agent: roles[2] || 'shell', x: 600, y: 152, w: 520, h: 370, z: 1, minimized: false }
+      ];
+    }
+
+    function freshState(roles) {
+      return { version: VERSION, name: '기본 작업실', snap: false, preset: 'free', focusId: null, windows: defaultWindows(roles) };
+    }
+
+    function normalizeItem(raw, index) {
+      if (!raw || typeof raw !== 'object') return null;
+      const id = safeId(raw.id);
+      const text = boundedString(raw.text, 240);
+      if (!id || !text) return null;
+      return { id, text, done: raw.done === true };
+    }
+
+    function validateWindow(raw, usedIds, usedSlots) {
+      if (!raw || typeof raw !== 'object' || !allowedKinds.has(raw.kind)) return null;
+      const id = safeId(raw.id);
+      if (!id || usedIds.has(id)) return null;
+      const base = {
+        id,
+        kind: raw.kind,
+        title: boundedString(raw.title, 48, raw.kind === 'terminal' ? 'Terminal' : 'Panel'),
+        x: clamp(Number.isFinite(Number(raw.x)) ? Math.round(Number(raw.x)) : 24, 0, 5000),
+        y: clamp(Number.isFinite(Number(raw.y)) ? Math.round(Number(raw.y)) : 24, 0, 5000),
+        w: clamp(Number.isFinite(Number(raw.w)) ? Math.round(Number(raw.w)) : 460, 280, 1600),
+        h: clamp(Number.isFinite(Number(raw.h)) ? Math.round(Number(raw.h)) : 320, 180, 1200),
+        z: clamp(Number.isFinite(Number(raw.z)) ? Math.round(Number(raw.z)) : 1, 1, 9999),
+        minimized: raw.minimized === true
+      };
+      if (raw.kind === 'terminal') {
+        const slot = Number(raw.slot);
+        if (!Number.isInteger(slot) || slot < 1 || slot > MAX_TERMINALS || usedSlots.has(slot) || !allowedAgents.has(raw.agent)) return null;
+        base.slot = slot;
+        base.agent = raw.agent;
+        base.title = base.title || `${base.agent} ${slot}`;
+        usedSlots.add(slot);
+      } else if (raw.kind === 'note') {
+        base.content = boundedString(raw.content, 100000);
+      } else if (raw.kind === 'checklist') {
+        const itemIds = new Set();
+        base.items = Array.isArray(raw.items) ? raw.items.slice(0, 100).map(normalizeItem).filter(item => item && !itemIds.has(item.id) && itemIds.add(item.id)) : [];
+      } else if (raw.kind === 'html') {
+        base.html = boundedString(raw.html, 300000, '<main style="padding:24px;font-family:system-ui"><h1>새 위젯</h1><p>HTML, CSS, JavaScript를 입력하고 적용하세요.</p></main>');
+      }
+      usedIds.add(id);
+      return base;
+    }
+
+    function validateState(raw) {
+      if (!raw || typeof raw !== 'object' || Number(raw.version) !== VERSION || !Array.isArray(raw.windows) || raw.windows.length > MAX_WINDOWS) return null;
+      const usedIds = new Set();
+      const usedSlots = new Set();
+      const windows = raw.windows.map(item => validateWindow(item, usedIds, usedSlots)).filter(Boolean);
+      if (windows.length !== raw.windows.length) return null;
+      const focusId = safeId(raw.focusId);
+      return {
+        version: VERSION,
+        name: boundedString(raw.name, 48, '가져온 작업실') || '가져온 작업실',
+        snap: raw.snap === true,
+        preset: ['free', 'side', 'grid', 'focus'].includes(raw.preset) ? raw.preset : 'free',
+        focusId: focusId && usedIds.has(focusId) ? focusId : null,
+        windows
+      };
+    }
+
+    function migrateLegacy() {
+      try {
+        const raw = JSON.parse(localStorage.getItem(LEGACY_KEY));
+        if (!raw || typeof raw !== 'object') return freshState();
+        const roles = Array.from({ length: 3 }, (_, i) => allowedAgents.has(raw.roles?.[i]) ? raw.roles[i] : ['codex', 'claude', 'shell'][i]);
+        return freshState(roles);
+      } catch (_) {
+        return freshState();
+      }
+    }
+
+    function loadState() {
+      try {
+        const parsed = JSON.parse(localStorage.getItem(STORE_KEY));
+        return validateState(parsed) || migrateLegacy();
+      } catch (_) {
+        return migrateLegacy();
+      }
+    }
+
+    let state = loadState();
+
+    function exportableState(source = state) {
+      return {
+        version: VERSION,
+        name: source.name,
+        snap: source.snap,
+        preset: source.preset,
+        focusId: source.focusId,
+        windows: source.windows.map(win => {
+          const clean = { id: win.id, kind: win.kind, title: win.title, x: win.x, y: win.y, w: win.w, h: win.h, z: win.z, minimized: win.minimized };
+          if (win.kind === 'terminal') Object.assign(clean, { slot: win.slot, agent: win.agent });
+          if (win.kind === 'note') clean.content = win.content;
+          if (win.kind === 'checklist') clean.items = win.items.map(item => ({ id: item.id, text: item.text, done: item.done }));
+          if (win.kind === 'html') clean.html = win.html;
+          return clean;
+        })
+      };
+    }
+
+    function persist(immediate = false) {
+      clearTimeout(persistTimer);
+      const write = () => {
+        try { localStorage.setItem(STORE_KEY, JSON.stringify(exportableState())); }
+        catch (_) { setStatus('브라우저 저장소를 사용할 수 없습니다'); }
+      };
+      if (immediate) write(); else persistTimer = setTimeout(write, 180);
+    }
+
+    function setStatus(message) {
+      $('#statusText').textContent = message;
+    }
+
+    function newId(prefix) {
+      do { sequence += 1; } while (state.windows.some(win => win.id === `${prefix}-${sequence}`));
+      return `${prefix}-${sequence}`;
+    }
+
+    function getCanvasSize() {
+      const rect = canvas.getBoundingClientRect();
+      return { width: Math.max(320, rect.width), height: Math.max(260, rect.height) };
+    }
+
+    function nextPosition(index = state.windows.length) {
+      const size = getCanvasSize();
+      return { x: clamp(26 + (index * 38) % Math.max(80, size.width - 410), 0, Math.max(0, size.width - 300)), y: clamp(24 + (index * 34) % Math.max(80, size.height - 280), 0, Math.max(0, size.height - 190)) };
+    }
+
+    function snapValue(value) {
+      return state.snap ? Math.round(value / GRID) * GRID : Math.round(value);
+    }
+
+    function bringFront(id) {
+      const win = state.windows.find(item => item.id === id);
+      if (!win) return;
+      const highest = Math.max(0, ...state.windows.map(item => item.z));
+      win.z = highest + 1;
+      if (win.z > 9000) state.windows.sort((a,b) => a.z - b.z).forEach((item, index) => item.z = index + 1);
+      activeId = id;
+      syncAllWindowStyles();
+      persist();
+    }
+
+    function terminalMock(slot, agent) {
+      const label = agent === 'codex' ? 'Codex' : agent === 'claude' ? 'Claude' : 'Shell';
+      const prompt = agent === 'shell' ? 'pwd' : '현재 프로젝트를 분석해 주세요';
+      const answer = agent === 'shell' ? '/workspace/repos' : '데모 모드입니다. 실제 CLI 연결이 아닌 목업 출력입니다.';
+      const scope = agent === 'claude' ? '작업 경로 /workspace/public · 공개 데이터 전용 · 인증은 CLI에서 별도 확인' : '작업 경로 /workspace/repos';
+      return `<!doctype html><html lang="ko"><head><meta charset="utf-8"><style>html,body{height:100%;margin:0;background:#080b10;color:#cdd8e7;font:13px/1.7 ui-monospace,SFMono-Regular,Consolas,monospace}body{padding:20px;box-sizing:border-box}.green{color:#54d6b2}.blue{color:#8aa4ff}.dim{color:#657286}.warn{color:#e8bb68}.cursor{display:inline-block;width:7px;height:14px;background:#8aa4ff;vertical-align:-2px;animation:b 1s step-end infinite}@keyframes b{50%{opacity:0}}</style></head><body><div><span class="green">●</span> <strong>${label}</strong> <span class="dim">slot ${slot}</span></div><div class="dim">${scope}</div><br><div><span class="blue">studio</span>:~$ ${prompt}</div><div class="dim">${answer}</div><br><div class="warn">MOCK TERMINAL · ?demo=1 preview</div><div class="dim">배포 환경에서는 /terminal/${slot}/${agent}/ 경로에 연결됩니다.</div><br><span class="blue">studio</span>:~$ <span class="cursor"></span></body></html>`;
+    }
+
+    function connectTerminal(win, reconnect = false, silent = false) {
+      const entry = domById.get(win.id);
+      const frame = entry?.querySelector('iframe.terminal-frame');
+      const loading = entry?.querySelector('.frame-loading');
+      if (!frame) return;
+      if (loading) { loading.hidden = false; loading.textContent = reconnect ? '다시 연결하는 중…' : '터미널 연결 중…'; }
+      frame.title = `슬롯 ${win.slot} ${win.agent} 터미널`;
+      frame.onload = () => { if (loading) loading.hidden = true; };
+      if (demo) {
+        frame.removeAttribute('src');
+        frame.srcdoc = terminalMock(win.slot, win.agent);
+      } else {
+        frame.removeAttribute('srcdoc');
+        frame.src = `/terminal/${win.slot}/${win.agent}/`;
+      }
+      if (!silent) setStatus(`슬롯 ${win.slot} ${reconnect ? '다시 연결' : '에이전트 전환'} 요청됨`);
+    }
+
+    function buildWidgetDoc(html) {
+      const csp = "default-src 'none'; connect-src 'none'; img-src data: blob:; style-src 'unsafe-inline'; script-src 'unsafe-inline'; frame-src 'none'; form-action 'none'; base-uri 'none'";
+      return `<!doctype html><html><head><meta charset="utf-8"><meta http-equiv="Content-Security-Policy" content="${csp}"><meta name="viewport" content="width=device-width,initial-scale=1"><style>html,body{min-height:100%;margin:0}*{box-sizing:border-box}</style></head><body>${html}</body></html>`;
+    }
+
+    function createButton(label, className, action) {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = className;
+      button.textContent = label;
+      button.dataset.action = action;
+      return button;
+    }
+
+    function createWindow(win) {
+      const article = document.createElement('article');
+      article.className = 'studio-window';
+      article.dataset.id = win.id;
+      article.dataset.kind = win.kind;
+      article.setAttribute('aria-label', `${win.title} 창`);
+
+      const titlebar = document.createElement('header');
+      titlebar.className = 'window-titlebar';
+      titlebar.tabIndex = 0;
+      titlebar.setAttribute('role', 'toolbar');
+      titlebar.setAttribute('aria-label', `${win.title} 이동 핸들. 방향키로 이동`);
+      const dot = document.createElement('span'); dot.className = 'window-dot'; dot.setAttribute('aria-hidden', 'true');
+      const heading = document.createElement('div'); heading.className = 'window-heading';
+      const title = document.createElement('span'); title.className = 'window-title'; title.textContent = win.title;
+      const meta = document.createElement('span'); meta.className = 'window-meta'; meta.textContent = win.kind === 'terminal' ? `SLOT ${win.slot}${win.agent === 'claude' ? ' · PUBLIC' : ''}` : win.kind.toUpperCase();
+      heading.append(title, meta);
+      titlebar.append(dot, heading);
+
+      if (win.kind === 'terminal') {
+        const select = document.createElement('select');
+        select.className = 'agent-select';
+        select.setAttribute('aria-label', `슬롯 ${win.slot} 에이전트`);
+        [['codex','Codex'], ['claude','Claude'], ['shell','Shell']].forEach(([value,label]) => { const option = document.createElement('option'); option.value = value; option.textContent = label; select.append(option); });
+        select.value = win.agent;
+        titlebar.append(select);
+      }
+
+      const spacer = document.createElement('span'); spacer.className = 'titlebar-spacer';
+      const actions = document.createElement('div'); actions.className = 'window-actions';
+      if (win.kind === 'terminal') actions.append(createButton('다시 연결', 'window-button', 'reconnect'));
+      actions.append(createButton('최소화', 'window-button', 'minimize'), createButton('집중', 'window-button', 'focus'), createButton('닫기', 'window-button close', 'close'));
+      titlebar.append(spacer, actions);
+
+      const content = document.createElement('div'); content.className = 'window-content';
+      if (win.kind === 'terminal') createTerminalContent(win, content);
+      if (win.kind === 'note') createNoteContent(win, content);
+      if (win.kind === 'checklist') createChecklistContent(win, content);
+      if (win.kind === 'html') createHtmlContent(win, content);
+
+      const resize = document.createElement('button');
+      resize.type = 'button'; resize.className = 'resize-handle'; resize.textContent = '크기';
+      resize.setAttribute('aria-label', `${win.title} 크기 조절 핸들. 방향키로 조절`);
+      article.append(titlebar, content, resize);
+      canvas.insertBefore(article, tray);
+      domById.set(win.id, article);
+      bindWindowEvents(win, article, titlebar, resize);
+      syncWindow(win);
+      return article;
+    }
+
+    function createTerminalContent(win, content) {
+      const wrap = document.createElement('div'); wrap.className = 'terminal-wrap';
+      const loading = document.createElement('div'); loading.className = 'frame-loading'; loading.textContent = '터미널 연결 중…';
+      const frame = document.createElement('iframe'); frame.className = 'terminal-frame'; frame.setAttribute('loading', 'eager'); frame.setAttribute('referrerpolicy', 'no-referrer'); frame.title = `슬롯 ${win.slot} ${win.agent} 터미널`;
+      wrap.append(loading, frame);
+      if (demo) { const chip = document.createElement('div'); chip.className = 'demo-chip'; chip.textContent = 'MOCK'; wrap.append(chip); }
+      content.append(wrap);
+      queueMicrotask(() => connectTerminal(win, false, true));
+    }
+
+    function createNoteContent(win, content) {
+      const area = document.createElement('textarea');
+      area.className = 'note-area'; area.placeholder = '아이디어, 명령어, 컨텍스트를 기록하세요.'; area.value = win.content;
+      area.setAttribute('aria-label', `${win.title} 내용`);
+      area.addEventListener('input', () => { win.content = area.value.slice(0, 100000); persist(); });
+      content.append(area);
+    }
+
+    function renderChecklist(win, list) {
+      list.replaceChildren();
+      win.items.forEach(item => {
+        const row = document.createElement('div'); row.className = `check-item${item.done ? ' done' : ''}`;
+        const check = document.createElement('input'); check.type = 'checkbox'; check.checked = item.done; check.setAttribute('aria-label', `${item.text} 완료`);
+        const text = document.createElement('input'); text.type = 'text'; text.maxLength = 240; text.value = item.text; text.setAttribute('aria-label', '체크리스트 항목');
+        const remove = document.createElement('button'); remove.type = 'button'; remove.className = 'check-delete'; remove.textContent = '삭제';
+        check.addEventListener('change', () => { item.done = check.checked; row.classList.toggle('done', item.done); persist(); });
+        text.addEventListener('input', () => { item.text = text.value.slice(0,240); check.setAttribute('aria-label', `${item.text} 완료`); persist(); });
+        remove.addEventListener('click', () => { win.items = win.items.filter(value => value !== item); renderChecklist(win, list); persist(); });
+        row.append(check, text, remove); list.append(row);
+      });
+    }
+
+    function createChecklistContent(win, content) {
+      const panel = document.createElement('div'); panel.className = 'checklist-panel';
+      const add = document.createElement('form'); add.className = 'check-add';
+      const input = document.createElement('input'); input.type = 'text'; input.maxLength = 240; input.placeholder = '새 할 일'; input.setAttribute('aria-label', '새 체크리스트 항목');
+      const button = createButton('추가', 'small-button', 'add-check'); button.type = 'submit';
+      const list = document.createElement('div'); list.className = 'check-list';
+      add.append(input, button); panel.append(add, list); content.append(panel);
+      add.addEventListener('submit', event => { event.preventDefault(); const text = input.value.trim(); if (!text || win.items.length >= 100) return; win.items.push({ id: newId('item'), text: text.slice(0,240), done: false }); input.value = ''; renderChecklist(win, list); persist(); });
+      renderChecklist(win, list);
+    }
+
+    function createHtmlContent(win, content) {
+      const panel = document.createElement('div'); panel.className = 'html-panel';
+      const editor = document.createElement('textarea'); editor.className = 'html-editor'; editor.value = win.html; editor.spellcheck = false; editor.setAttribute('aria-label', `${win.title} HTML 편집기`);
+      const tools = document.createElement('div'); tools.className = 'html-tools';
+      const info = document.createElement('span'); info.textContent = '브라우저 전용 · 네트워크 및 상위 페이지 접근 차단';
+      const apply = createButton('미리보기 적용', 'small-button', 'apply-html');
+      const wrap = document.createElement('div'); wrap.className = 'widget-wrap';
+      const frame = document.createElement('iframe'); frame.className = 'widget-frame'; frame.title = `${win.title} 격리 미리보기`; frame.setAttribute('sandbox', 'allow-scripts'); frame.setAttribute('referrerpolicy', 'no-referrer');
+      tools.append(info, apply); wrap.append(frame); panel.append(editor, tools, wrap); content.append(panel);
+      const applyHtml = () => { win.html = editor.value.slice(0, 300000); frame.srcdoc = buildWidgetDoc(win.html); persist(); setStatus('HTML 위젯 미리보기를 갱신했습니다'); };
+      apply.addEventListener('click', applyHtml);
+      frame.srcdoc = buildWidgetDoc(win.html);
+    }
+
+    function bindWindowEvents(win, article, titlebar, resize) {
+      article.addEventListener('pointerdown', () => bringFront(win.id));
+      titlebar.addEventListener('pointerdown', event => { lastPointerAt = Date.now(); if (isControlTarget(event.target)) return; startInteraction(event, win, 'move', true, titlebar); });
+      titlebar.addEventListener('mousedown', event => { if (Date.now() - lastPointerAt < 700 || isControlTarget(event.target)) return; startInteraction(event, win, 'move', false, titlebar); });
+      resize.addEventListener('pointerdown', event => { lastPointerAt = Date.now(); startInteraction(event, win, 'resize', true, resize); });
+      resize.addEventListener('mousedown', event => { if (Date.now() - lastPointerAt < 700) return; startInteraction(event, win, 'resize', false, resize); });
+      titlebar.addEventListener('keydown', event => keyboardMove(event, win));
+      resize.addEventListener('keydown', event => keyboardResize(event, win));
+      article.addEventListener('click', event => {
+        const button = event.target.closest('[data-action]');
+        if (!button) return;
+        const action = button.dataset.action;
+        if (action === 'minimize') minimizeWindow(win);
+        if (action === 'focus') toggleFocus(win.id);
+        if (action === 'close') closeWindow(win);
+        if (action === 'reconnect') connectTerminal(win, true);
+      });
+      const agent = $('.agent-select', article);
+      if (agent) agent.addEventListener('change', () => { if (!allowedAgents.has(agent.value) || agent.value === win.agent) return; win.agent = agent.value; win.title = agent.options[agent.selectedIndex].text; $('.window-title', article).textContent = win.title; $('.window-meta', article).textContent = `SLOT ${win.slot}${win.agent === 'claude' ? ' · PUBLIC' : ''}`; article.setAttribute('aria-label', `${win.title} 창`); connectTerminal(win); persist(true); });
+    }
+
+    function isControlTarget(target) {
+      return !!target.closest('button, input, select, textarea, a, [contenteditable="true"]');
+    }
+
+    function startInteraction(event, win, mode, isPointer, handle) {
+      if (interaction || event.button !== 0 || state.focusId) return;
+      event.preventDefault();
+      bringFront(win.id);
+      const start = { clientX: event.clientX, clientY: event.clientY, x: win.x, y: win.y, w: win.w, h: win.h };
+      interaction = { mode, isPointer };
+      app.classList.add('interacting');
+      document.documentElement.style.userSelect = 'none';
+      if (isPointer) { try { handle.setPointerCapture(event.pointerId); } catch (_) {} }
+      const moveName = isPointer ? 'pointermove' : 'mousemove';
+      const upName = isPointer ? 'pointerup' : 'mouseup';
+      const onMove = moveEvent => {
+        const dx = moveEvent.clientX - start.clientX;
+        const dy = moveEvent.clientY - start.clientY;
+        const size = getCanvasSize();
+        if (mode === 'move') {
+          win.x = snapValue(clamp(start.x + dx, 0, Math.max(0, size.width - Math.min(win.w, 120))));
+          win.y = snapValue(clamp(start.y + dy, 0, Math.max(0, size.height - 42)));
+        } else {
+          win.w = snapValue(clamp(start.w + dx, 280, Math.min(1600, Math.max(280, size.width - win.x))));
+          win.h = snapValue(clamp(start.h + dy, 180, Math.min(1200, Math.max(180, size.height - win.y))));
+        }
+        syncWindow(win);
+      };
+      const finish = () => {
+        interaction = null;
+        app.classList.remove('interacting');
+        document.documentElement.style.userSelect = '';
+        window.removeEventListener(moveName, onMove);
+        window.removeEventListener(upName, finish);
+        window.removeEventListener('pointercancel', finish);
+        window.removeEventListener('blur', finish);
+        persist(true);
+      };
+      window.addEventListener(moveName, onMove);
+      window.addEventListener(upName, finish);
+      if (isPointer) window.addEventListener('pointercancel', finish);
+      window.addEventListener('blur', finish);
+    }
+
+    function keyboardMove(event, win) {
+      if (!['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(event.key) || isControlTarget(event.target)) return;
+      event.preventDefault();
+      const step = event.shiftKey ? GRID : 8;
+      if (event.key === 'ArrowLeft') win.x -= step;
+      if (event.key === 'ArrowRight') win.x += step;
+      if (event.key === 'ArrowUp') win.y -= step;
+      if (event.key === 'ArrowDown') win.y += step;
+      const size = getCanvasSize();
+      win.x = snapValue(clamp(win.x, 0, Math.max(0, size.width - 120)));
+      win.y = snapValue(clamp(win.y, 0, Math.max(0, size.height - 42)));
+      bringFront(win.id); syncWindow(win); persist();
+    }
+
+    function keyboardResize(event, win) {
+      if (!['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(event.key)) return;
+      event.preventDefault();
+      const step = event.shiftKey ? GRID : 8;
+      const size = getCanvasSize();
+      if (event.key === 'ArrowLeft') win.w -= step;
+      if (event.key === 'ArrowRight') win.w += step;
+      if (event.key === 'ArrowUp') win.h -= step;
+      if (event.key === 'ArrowDown') win.h += step;
+      win.w = snapValue(clamp(win.w, 280, Math.min(1600, Math.max(280, size.width - win.x))));
+      win.h = snapValue(clamp(win.h, 180, Math.min(1200, Math.max(180, size.height - win.y))));
+      syncWindow(win); persist();
+    }
+
+    function syncWindow(win) {
+      const article = domById.get(win.id);
+      if (!article) return;
+      article.style.left = `${win.x}px`;
+      article.style.top = `${win.y}px`;
+      article.style.width = `${win.w}px`;
+      article.style.height = `${win.h}px`;
+      article.style.zIndex = String(win.z);
+      article.classList.toggle('is-minimized', win.minimized);
+      article.classList.toggle('is-focused', state.focusId === win.id);
+      article.classList.toggle('is-active', activeId === win.id);
+      const focusButton = $('[data-action="focus"]', article);
+      if (focusButton) focusButton.textContent = state.focusId === win.id ? '집중 해제' : '집중';
+    }
+
+    function syncAllWindowStyles() {
+      state.windows.forEach(syncWindow);
+      canvas.classList.toggle('has-focus', !!state.focusId);
+      canvas.classList.toggle('snap-on', state.snap);
+      $$('.preset').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.preset === state.preset)));
+      $('#snapToggle').checked = state.snap;
+      $('#dialogSnapToggle').checked = state.snap;
+      $('#workspaceName').value = state.name;
+      updateTray(); updateStatus();
+    }
+
+    function updateStatus() {
+      const visible = state.windows.filter(win => !win.minimized).length;
+      const terminals = state.windows.filter(win => win.kind === 'terminal').length;
+      $('#windowCount').textContent = `창 ${visible}/${state.windows.length}개 · 터미널 ${terminals}/${MAX_TERMINALS}`;
+      $('#emptyTip').hidden = state.windows.length !== 0;
+    }
+
+    function updateTray() {
+      tray.replaceChildren();
+      const minimized = state.windows.filter(win => win.minimized);
+      if (!minimized.length) return;
+      const label = document.createElement('span'); label.className = 'tray-label'; label.textContent = '최소화'; tray.append(label);
+      minimized.forEach(win => {
+        const button = document.createElement('button'); button.type = 'button'; button.className = 'tray-button'; button.textContent = `${win.title}${win.kind === 'terminal' ? ` · 슬롯 ${win.slot}` : ''}`;
+        button.addEventListener('click', () => { win.minimized = false; bringFront(win.id); syncAllWindowStyles(); persist(true); setStatus(`${win.title} 창을 복원했습니다`); });
+        tray.append(button);
+      });
+    }
+
+    function minimizeWindow(win) {
+      win.minimized = true;
+      if (state.focusId === win.id) state.focusId = null;
+      state.preset = 'free';
+      syncAllWindowStyles(); persist(true); setStatus(`${win.title} 창을 최소화했습니다`);
+    }
+
+    function toggleFocus(id) {
+      const win = state.windows.find(item => item.id === id);
+      if (!win) return;
+      if (win.minimized) win.minimized = false;
+      state.focusId = state.focusId === id ? null : id;
+      state.preset = state.focusId ? 'focus' : 'free';
+      bringFront(id); syncAllWindowStyles(); persist(true);
+      setStatus(state.focusId ? `${win.title} 집중 보기` : '집중 보기를 해제했습니다');
+    }
+
+    function closeWindow(win) {
+      const message = win.kind === 'terminal' ? `슬롯 ${win.slot} ${win.title} 창을 닫으시겠습니까? 화면에서만 분리되며 터미널 세션은 종료되지 않습니다.` : `${win.title} 창을 닫으시겠습니까?`;
+      if (!confirm(message)) return;
+      state.windows = state.windows.filter(item => item.id !== win.id);
+      if (state.focusId === win.id) state.focusId = null;
+      domById.get(win.id)?.remove(); domById.delete(win.id);
+      activeId = state.windows.at(-1)?.id || null;
+      state.preset = 'free'; syncAllWindowStyles(); persist(true); setStatus(`${win.title} 창을 닫았습니다`);
+    }
+
+    function freeSlot() {
+      const used = new Set(state.windows.filter(win => win.kind === 'terminal').map(win => win.slot));
+      for (let slot = 1; slot <= MAX_TERMINALS; slot += 1) if (!used.has(slot)) return slot;
+      return null;
+    }
+
+    function addWindow(kind) {
+      if (!allowedKinds.has(kind) || state.windows.length >= MAX_WINDOWS) { setStatus('추가 가능한 창 수에 도달했습니다'); return; }
+      const pos = nextPosition();
+      const base = { id: newId(kind), kind, title: '', x: pos.x, y: pos.y, w: 460, h: 330, z: Math.max(0, ...state.windows.map(win => win.z)) + 1, minimized: false };
+      let win;
+      if (kind === 'terminal') {
+        const slot = freeSlot();
+        if (!slot) { setStatus('터미널 슬롯 8개를 모두 사용 중입니다'); return; }
+        const agents = ['codex','claude','shell']; const agent = agents[(slot - 1) % agents.length];
+        win = { ...base, id: `terminal-${slot}`, title: agent === 'codex' ? 'Codex' : agent === 'claude' ? 'Claude' : 'Shell', slot, agent, w: 550, h: 390 };
+      } else if (kind === 'note') win = { ...base, title: '로컬 메모', content: '' };
+      else if (kind === 'checklist') win = { ...base, title: '체크리스트', items: [] };
+      else win = { ...base, title: 'HTML 위젯', html: '<main style="padding:24px;font-family:system-ui;color:#172033"><h1 style="margin-top:0">새 위젯</h1><p>HTML, CSS, JavaScript를 입력하고 미리보기를 적용하세요.</p></main>', w: 520, h: 430 };
+      if (state.windows.some(item => item.id === win.id)) win.id = newId(kind);
+      state.windows.push(win); activeId = win.id; state.focusId = null; state.preset = 'free'; createWindow(win); syncAllWindowStyles(); persist(true); setStatus(`${win.title} 창을 추가했습니다`);
+    }
+
+    function visibleWindows() { return state.windows.filter(win => !win.minimized); }
+
+    function applyPreset(name) {
+      const windows = visibleWindows();
+      if (!windows.length) { setStatus('배치할 창이 없습니다'); return; }
+      const size = getCanvasSize();
+      const gap = 12;
+      state.focusId = null;
+      if (name === 'focus') {
+        const target = state.windows.find(win => win.id === activeId && !win.minimized) || windows.reduce((a,b) => a.z > b.z ? a : b);
+        state.focusId = target.id; activeId = target.id;
+      } else if (name === 'free') {
+        windows.forEach((win, index) => {
+          win.x = 22 + (index * 38) % Math.max(50, size.width - 430);
+          win.y = 20 + (index * 34) % Math.max(50, size.height - 300);
+          win.w = clamp(win.kind === 'html' ? 520 : 500, 280, Math.max(280, size.width - win.x - 12));
+          win.h = clamp(win.kind === 'html' ? 420 : 350, 180, Math.max(180, size.height - win.y - 12));
+        });
+      } else if (name === 'side') {
+        const width = Math.max(280, Math.floor((size.width - gap * (windows.length + 1)) / windows.length));
+        const height = Math.max(180, size.height - gap * 2 - 40);
+        windows.forEach((win, index) => { win.x = gap + index * (width + gap); win.y = gap; win.w = width; win.h = height; });
+      } else if (name === 'grid') {
+        const cols = Math.ceil(Math.sqrt(windows.length));
+        const rows = Math.ceil(windows.length / cols);
+        const width = Math.max(280, Math.floor((size.width - gap * (cols + 1)) / cols));
+        const height = Math.max(180, Math.floor((size.height - gap * (rows + 1) - 34) / rows));
+        windows.forEach((win, index) => { const col = index % cols; const row = Math.floor(index / cols); win.x = gap + col * (width + gap); win.y = gap + row * (height + gap); win.w = width; win.h = height; });
+      }
+      state.preset = name; syncAllWindowStyles(); persist(true); setStatus(`${name === 'free' ? '자유 배치' : name === 'side' ? '나란히' : name === 'grid' ? '격자' : '집중'} 프리셋을 적용했습니다`);
+    }
+
+    function rebuildWorkspace(nextState) {
+      state = nextState;
+      domById.forEach(node => node.remove()); domById.clear();
+      activeId = state.windows.reduce((best, win) => !best || win.z > best.z ? win : best, null)?.id || null;
+      state.windows.forEach(createWindow);
+      syncAllWindowStyles(); persist(true);
+    }
+
+    function loadSavedLayouts() {
+      try {
+        const raw = JSON.parse(localStorage.getItem(SAVED_KEY));
+        if (!Array.isArray(raw)) return [];
+        return raw.slice(0, 20).map(entry => {
+          if (!entry || typeof entry !== 'object') return null;
+          const name = boundedString(entry.name, 48).trim();
+          const validated = validateState(entry.state);
+          return name && validated ? { name, state: validated } : null;
+        }).filter(Boolean);
+      } catch (_) { return []; }
+    }
+
+    let savedLayouts = loadSavedLayouts();
+
+    function persistSavedLayouts() {
+      try { localStorage.setItem(SAVED_KEY, JSON.stringify(savedLayouts.map(entry => ({ name: entry.name, state: exportableState(entry.state) })))); }
+      catch (_) { setStatus('저장된 작업공간 목록을 기록하지 못했습니다'); }
+    }
+
+    function refreshSavedSelect(selected = '') {
+      const select = $('#savedLayouts'); select.replaceChildren();
+      const placeholder = document.createElement('option'); placeholder.value = ''; placeholder.textContent = savedLayouts.length ? '저장된 작업공간 선택' : '저장된 작업공간 없음'; select.append(placeholder);
+      savedLayouts.forEach(entry => { const option = document.createElement('option'); option.value = entry.name; option.textContent = entry.name; select.append(option); });
+      select.value = selected;
+    }
+
+    function saveNamedWorkspace() {
+      const name = $('#workspaceName').value.trim().slice(0,48);
+      if (!name) { alert('작업공간 이름을 입력해 주세요.'); $('#workspaceName').focus(); return; }
+      state.name = name;
+      const index = savedLayouts.findIndex(entry => entry.name === name);
+      if (index >= 0 && !confirm(`'${name}' 작업공간을 현재 배치로 덮어쓰시겠습니까?`)) return;
+      const copy = validateState(JSON.parse(JSON.stringify(exportableState())));
+      if (index >= 0) savedLayouts[index] = { name, state: copy }; else { savedLayouts.unshift({ name, state: copy }); savedLayouts = savedLayouts.slice(0,20); }
+      persistSavedLayouts(); refreshSavedSelect(name); syncAllWindowStyles(); persist(true); setStatus(`'${name}' 작업공간을 저장했습니다`);
+    }
+
+    function exportWorkspace() {
+      state.name = ($('#workspaceName').value.trim() || state.name).slice(0,48);
+      const blob = new Blob([JSON.stringify(exportableState(), null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url; link.download = `${state.name.replace(/[^a-z0-9가-힣_-]+/gi,'-') || 'ai-studio'}.json`; document.body.append(link); link.click(); link.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000); setStatus('작업공간 JSON을 내보냈습니다');
+    }
+
+    async function importWorkspace(file) {
+      if (!file) return;
+      if (file.size > 2 * 1024 * 1024) { alert('가져오기 파일은 2MB 이하여야 합니다.'); return; }
+      try {
+        const raw = JSON.parse(await file.text());
+        const validated = validateState(raw);
+        if (!validated) throw new Error('invalid');
+        if (!confirm(`'${validated.name}' 작업공간을 불러오시겠습니까? 현재 배치는 교체됩니다.`)) return;
+        rebuildWorkspace(validated); setStatus(`'${validated.name}' 작업공간을 가져왔습니다`);
+      } catch (_) { alert('유효한 AI 작업실 v2 JSON 파일이 아닙니다.'); }
+      finally { $('#importFile').value = ''; }
+    }
+
+    function setSnap(value) {
+      state.snap = value;
+      syncAllWindowStyles(); persist(true); setStatus(value ? '격자 맞춤을 켰습니다' : '격자 맞춤을 껐습니다');
+    }
+
+    $$('.palette-button').forEach(button => button.addEventListener('click', () => addWindow(button.dataset.add)));
+    $$('.preset').forEach(button => button.addEventListener('click', () => applyPreset(button.dataset.preset)));
+    $('#saveWorkspace').addEventListener('click', saveNamedWorkspace);
+    $('#exportWorkspace').addEventListener('click', exportWorkspace);
+    $('#importWorkspace').addEventListener('click', () => $('#importFile').click());
+    $('#importFile').addEventListener('change', event => importWorkspace(event.target.files?.[0]));
+    $('#loadLayout').addEventListener('click', () => {
+      const name = $('#savedLayouts').value; const entry = savedLayouts.find(item => item.name === name);
+      if (!entry) { setStatus('불러올 작업공간을 선택해 주세요'); return; }
+      if (!confirm(`'${name}' 작업공간을 불러오시겠습니까? 현재 배치는 교체됩니다.`)) return;
+      const copy = validateState(JSON.parse(JSON.stringify(exportableState(entry.state)))); rebuildWorkspace(copy); setStatus(`'${name}' 작업공간을 불러왔습니다`);
+    });
+    $('#deleteLayout').addEventListener('click', () => {
+      const name = $('#savedLayouts').value; if (!name) { setStatus('삭제할 작업공간을 선택해 주세요'); return; }
+      if (!confirm(`'${name}' 저장 작업공간을 삭제하시겠습니까?`)) return;
+      savedLayouts = savedLayouts.filter(item => item.name !== name); persistSavedLayouts(); refreshSavedSelect(); setStatus(`'${name}' 저장 작업공간을 삭제했습니다`);
+    });
+    $('#workspaceName').addEventListener('change', event => { state.name = event.target.value.trim().slice(0,48) || state.name; event.target.value = state.name; persist(); });
+    $('#snapToggle').addEventListener('change', event => setSnap(event.target.checked));
+    $('#dialogSnapToggle').addEventListener('change', event => setSnap(event.target.checked));
+    $('#settingsButton').addEventListener('click', () => $('#settingsDialog').showModal());
+    $$('[data-close-dialog]').forEach(button => button.addEventListener('click', () => $('#settingsDialog').close()));
+
+    window.addEventListener('keydown', event => {
+      if (isControlTarget(event.target) || event.target.closest('iframe')) return;
+      if (event.key === 'Escape' && state.focusId) { state.focusId = null; state.preset = 'free'; syncAllWindowStyles(); persist(true); setStatus('집중 보기를 해제했습니다'); return; }
+      if (!event.altKey || event.ctrlKey || event.metaKey) return;
+      if (event.key.toLowerCase() === 't') { event.preventDefault(); addWindow('terminal'); }
+      if (event.key.toLowerCase() === 'n') { event.preventDefault(); addWindow('note'); }
+    });
+
+    window.addEventListener('resize', () => {
+      if (innerWidth <= 680) return;
+      const size = getCanvasSize();
+      state.windows.forEach(win => { win.x = clamp(win.x, 0, Math.max(0, size.width - 120)); win.y = clamp(win.y, 0, Math.max(0, size.height - 42)); syncWindow(win); });
+      persist();
+    });
+
+    state.windows.forEach(createWindow);
+    activeId = state.windows.reduce((best, win) => !best || win.z > best.z ? win : best, null)?.id || null;
+    refreshSavedSelect();
+    syncAllWindowStyles();
+    if (demo) setStatus('데모 모드: 터미널은 명확히 표시된 목업 출력입니다');
   })();
   </script>
 </body>

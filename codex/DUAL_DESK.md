@@ -23,11 +23,12 @@ This branch adds an authenticated, resizable web terminal dashboard to the exist
 
 ## UI and sessions
 
-Default: two panels, Codex and Claude. Select three panels to add Shell. Every panel can independently select Codex, Claude or Shell. Drag separators with mouse or touch, or use arrow keys. Switch columns/rows, reconnect a single panel, and maximize a panel. Layout preferences remain in browser localStorage; credentials never do.
+Studio v2 replaces the fixed split view with freely movable/resizable windows, dynamic terminals, a feature palette, local notes/checklists and isolated HTML widgets. New workspaces default to Codex, Claude and Shell; existing split-view roles are migrated. Save named layouts, import/export JSON, use grid/side/focus presets, and minimize/restore windows without remounting terminal iframes. See [STUDIO.md](STUDIO.md) for details. Browser-local content is not synchronized or stored on the Railway volume; credentials are never stored by the UI.
 
-The nine possible slot/agent combinations use independent tmux sessions. Only panels that have been opened start CLI sessions. Closing/reloading/switching the iframe detaches the browser but preserves the CLI session. Redeploying a container restarts processes, not files or login data.
+The 24 possible slot/agent combinations across eight terminal slots use independent tmux sessions. Only panels that have been opened start CLI sessions. Closing/reloading/switching the iframe detaches the browser but preserves the CLI session. Redeploying a container restarts processes, not files or login data.
 
-- Workspace files: `/workspace/repos`
+- Codex/Shell workspace files: `/workspace/repos`
+- Claude default workdir: `/workspace/public`, public-classified material only (not OS isolation)
 - Codex settings/auth: `/workspace/codex`
 - Claude settings/auth: `/workspace/claude`
 - Codex always launches with `--ask-for-approval on-request`.

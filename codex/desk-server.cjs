@@ -30,7 +30,7 @@ function startTerminal(slot, agent) {
     if (!shuttingDown) setTimeout(() => startTerminal(slot, agent), 1000);
   });
 }
-for (let slot = 1; slot <= 3; slot++) for (const agent of agents) startTerminal(slot, agent);
+for (let slot = 1; slot <= 8; slot++) for (const agent of agents) startTerminal(slot, agent);
 
 function authorized(req) {
   const header = req.headers.authorization || '';
@@ -56,7 +56,7 @@ function challenge(res) {
 function terminalFor(req) {
   let pathname;
   try { pathname = new URL(req.url, 'http://localhost').pathname; } catch { return null; }
-  const match = /^\/terminal\/([1-3])\/(codex|claude|shell)(?:\/|$)/.exec(pathname);
+  const match = /^\/terminal\/([1-8])\/(codex|claude|shell)(?:\/|$)/.exec(pathname);
   return match ? terminals.get(`/terminal/${match[1]}/${match[2]}`) : null;
 }
 function forwardedHeaders(req) {
