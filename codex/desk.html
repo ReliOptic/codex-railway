@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="dark">
+  <title>AI 작업실</title>
+  <style>
+    :root { --bg:#0b0e14; --surface:#111621; --surface2:#161d2a; --line:#273245; --text:#edf2f8; --muted:#8b98aa; --accent:#7c9cff; --accent2:#45d6a8; --danger:#ff7182; }
+    * { box-sizing:border-box; }
+    html,body { margin:0; min-width:0; height:100%; background:var(--bg); color:var(--text); font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI","Noto Sans KR",sans-serif; }
+    button,select { font:inherit; }
+    button:focus-visible,select:focus-visible,.splitter:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
+    .app { height:100vh; height:100dvh; min-height:0; display:flex; flex-direction:column; }
+    header { min-height:64px; display:flex; align-items:center; gap:18px; padding:10px 18px; border-bottom:1px solid var(--line); background:rgba(17,22,33,.96); position:relative; z-index:5; }
+    .brand { white-space:nowrap; font-weight:750; font-size:18px; letter-spacing:-.03em; }
+    .brand b { color:var(--accent2); margin-right:8px; }
+    .security { color:var(--muted); font-size:12px; margin-right:auto; white-space:nowrap; }
+    .controls { display:flex; align-items:center; gap:7px; flex-wrap:wrap; justify-content:flex-end; }
+    .control, .icon-btn { color:#cdd7e5; background:var(--surface2); border:1px solid var(--line); border-radius:7px; height:34px; padding:0 10px; cursor:pointer; }
+    .control:hover,.icon-btn:hover { border-color:#526581; background:#1b2636; color:#fff; }
+    .control[aria-pressed="true"] { color:#fff; background:#293a66; border-color:#6584dc; }
+    .icon-btn { width:34px; padding:0; font-size:17px; line-height:1; }
+    main { flex:1; min-height:0; padding:12px; }
+    .workspace { height:100%; min-height:0; display:flex; background:#080b10; border:1px solid var(--line); border-radius:10px; overflow:hidden; }
+    .workspace.rows { flex-direction:column; }
+    .pane { min-width:0; min-height:0; display:flex; flex-direction:column; background:var(--surface); overflow:hidden; }
+    .pane[hidden], .splitter[hidden] { display:none !important; }
+    .pane-head { height:44px; flex:none; display:flex; align-items:center; padding:0 10px 0 13px; gap:9px; border-bottom:1px solid var(--line); background:#141a25; }
+    .slot { font-size:11px; color:var(--muted); font-weight:700; letter-spacing:.08em; }
+    .agent-select { appearance:none; color:var(--text); background:#202a3a; border:1px solid #34445c; border-radius:6px; padding:5px 28px 5px 8px; cursor:pointer; font-size:13px; background-image:linear-gradient(45deg,transparent 50%,#9caec6 50%),linear-gradient(135deg,#9caec6 50%,transparent 50%); background-position:calc(100% - 13px) 10px,calc(100% - 9px) 10px; background-size:4px 4px; background-repeat:no-repeat; }
+    .pane-actions { margin-left:auto; display:flex; gap:5px; }
+    .pane-actions .icon-btn { height:29px; width:29px; font-size:15px; }
+    .frame-wrap { flex:1; min-height:0; position:relative; background:#090c12; }
+    iframe { display:block; width:100%; height:100%; border:0; background:#090c12; }
+    .loading { position:absolute; inset:0; display:grid; place-items:center; color:var(--muted); font-size:13px; pointer-events:none; }
+    .splitter { flex:0 0 8px; width:8px; background:var(--line); position:relative; border:0; padding:0; cursor:col-resize; touch-action:none; z-index:2; }
+    .splitter:hover,.splitter:focus-visible { background:var(--accent); }
+    .splitter::after { content:""; position:absolute; inset:0; margin:auto; width:3px; height:30px; border-radius:4px; background:#65738a; }
+    .rows .splitter { flex:0 0 8px; width:100%; height:8px; cursor:row-resize; }
+    .rows .splitter::after { width:30px; height:3px; }
+    .fullscreen .workspace { position:fixed; inset:0; z-index:20; height:auto; border-radius:0; border:0; }
+    .fullscreen main { padding:0; }
+    .fullscreen header { display:none; }
+    @media (max-width:720px) { header { min-height:unset; align-items:flex-start; flex-wrap:wrap; padding:10px 12px; gap:6px 12px; } .security { order:3; width:100%; white-space:normal; } .controls { margin-left:auto; } .control { padding:0 8px; } main { padding:8px; } .workspace:not(.rows) { flex-direction:column; } .workspace:not(.rows) .splitter { flex:0 0 8px; width:100%; height:8px; cursor:row-resize; } .workspace:not(.rows) .splitter::after { width:30px; height:3px; } }
+  </style>
+</head>
+<body>
+  <div class="app" id="app">
+    <header>
+      <div class="brand"><b>●</b>AI 작업실</div>
+      <div class="security">승인/계정은 각 CLI에서 관리</div>
+      <div class="controls" aria-label="레이아웃 제어">
+        <button class="control" id="columns" type="button" aria-pressed="true">열</button>
+        <button class="control" id="rows" type="button" aria-pressed="false">행</button>
+        <button class="control" id="two" type="button" aria-pressed="true">2 패널</button>
+        <button class="control" id="three" type="button" aria-pressed="false">3 패널</button>
+        <button class="control" id="reset" type="button">초기화</button>
+      </div>
+    </header>
+    <main>
+      <section class="workspace" id="workspace" aria-label="터미널 작업 영역">
+        <article class="pane" data-slot="1"><div class="pane-head"><span class="slot">SLOT 1</span><select class="agent-select" aria-label="슬롯 1 에이전트"><option value="codex">Codex</option><option value="claude">Claude</option><option value="shell">Shell</option></select><div class="pane-actions"><button class="icon-btn reconnect" title="다시 연결" aria-label="슬롯 1 다시 연결">↻</button><button class="icon-btn expand" title="전체 화면" aria-label="슬롯 1 전체 화면">⛶</button></div></div><div class="frame-wrap"><div class="loading">터미널 준비 중…</div></div></article>
+        <button class="splitter" type="button" aria-label="패널 크기 조절" aria-orientation="vertical" tabindex="0"></button>
+        <article class="pane" data-slot="2"><div class="pane-head"><span class="slot">SLOT 2</span><select class="agent-select" aria-label="슬롯 2 에이전트"><option value="codex">Codex</option><option value="claude">Claude</option><option value="shell">Shell</option></select><div class="pane-actions"><button class="icon-btn reconnect" title="다시 연결" aria-label="슬롯 2 다시 연결">↻</button><button class="icon-btn expand" title="전체 화면" aria-label="슬롯 2 전체 화면">⛶</button></div></div><div class="frame-wrap"><div class="loading">터미널 준비 중…</div></div></article>
+        <button class="splitter" type="button" aria-label="패널 크기 조절" aria-orientation="vertical" tabindex="0"></button>
+        <article class="pane" data-slot="3"><div class="pane-head"><span class="slot">SLOT 3</span><select class="agent-select" aria-label="슬롯 3 에이전트"><option value="codex">Codex</option><option value="claude">Claude</option><option value="shell">Shell</option></select><div class="pane-actions"><button class="icon-btn reconnect" title="다시 연결" aria-label="슬롯 3 다시 연결">↻</button><button class="icon-btn expand" title="전체 화면" aria-label="슬롯 3 전체 화면">⛶</button></div></div><div class="frame-wrap"><div class="loading">터미널 준비 중…</div></div></article>
+      </section>
+    </main>
+  </div>
+  <script>
+  (() => {
+    'use strict';
+    const key='ai-workshop-layout-v1', qs=(s,r=document)=>r.querySelector(s), qsa=(s,r=document)=>[...r.querySelectorAll(s)];
+    const ws=qs('#workspace'), app=qs('#app'), panes=qsa('.pane'), splits=qsa('.splitter');
+    const safe=v=>['codex','claude','shell'].includes(v)?v:'shell';
+    const normalize=(values,count)=>{const fallback=100/count;let out=Array.from({length:count},(_,i)=>Number(values?.[i])>0?Number(values[i]):fallback);const sum=out.reduce((a,b)=>a+b,0);return out.map(v=>v/sum*100);};
+    const fresh=()=>({direction:'columns',count:2,roles:['codex','claude','shell'],ratios:[50,50],sizes:{2:[50,50],3:[100/3,100/3,100/3]}});
+    function load(){const base=fresh();try{const raw=JSON.parse(localStorage.getItem(key));if(!raw||typeof raw!=='object')return base;const count=raw.count===3?3:2, direction=raw.direction==='rows'?'rows':'columns',roles=Array.from({length:3},(_,i)=>safe(raw.roles?.[i]??base.roles[i]));const sizes={2:normalize(raw.sizes?.[2]??(count===2?raw.ratios:base.sizes[2]),2),3:normalize(raw.sizes?.[3]??(count===3?raw.ratios:base.sizes[3]),3)};return {direction,count,roles,ratios:[...sizes[count]],sizes};}catch(e){return base;}}
+    let state=load(), fullscreenSlot=null;
+    const demo=new URLSearchParams(location.search).get('demo')==='1';
+    const save=()=>{try{localStorage.setItem(key,JSON.stringify({direction:state.direction,count:state.count,roles:state.roles,ratios:state.ratios,sizes:state.sizes}));}catch(e){/* Storage can be disabled; layout still works for this visit. */}};
+    const mock=(slot,agent)=>`<!doctype html><style>body{margin:0;padding:18px;background:#090c12;color:#cfdae9;font:13px ui-monospace,monospace;line-height:1.7}.m{color:#48d9a9}.b{color:#8da8ff}.dim{color:#72829a}</style><div><span class=m>●</span> ${agent} <span class=dim>· 슬롯 ${slot} · 데모 미리보기</span><br><br><span class=b>workstation</span>:~$ ${agent==='shell'?'pwd':'도움말을 입력하세요'}<br><span class=dim>${agent==='shell'?'/workspace':'연결 대기 중'}</span><br><br><span class=m>준비됨</span><span class=dim> · 실제 터미널은 배포 환경에서 연결됩니다.</span></div>`;
+    function setFrame(pane,agent){const slot=pane.dataset.slot,frame=qs('iframe',pane);if(!frame)return;frame.title=`슬롯 ${slot} ${agent} 터미널`;if(demo)frame.srcdoc=mock(slot,agent);else frame.src=`/terminal/${slot}/${agent}/`;}
+    function createFrame(pane){if(qs('iframe',pane))return;const agent=safe(qs('select',pane).value),frame=document.createElement('iframe');frame.title=`슬롯 ${pane.dataset.slot} ${agent} 터미널`;frame.setAttribute('loading','lazy');if(demo)frame.srcdoc=mock(pane.dataset.slot,agent);else frame.src=`/terminal/${pane.dataset.slot}/${agent}/`;frame.addEventListener('load',()=>qs('.loading',pane)?.remove(),{once:true});qs('.frame-wrap',pane).append(frame);}
+    function visibleFrames(){panes.slice(0,state.count).forEach(createFrame);}
+    function apply(){ws.classList.toggle('rows',state.direction==='rows');panes.forEach((p,i)=>{const visible=fullscreenSlot===null?i<state.count:i===fullscreenSlot;p.hidden=!visible;p.style.flex=(fullscreenSlot===i?'1 1 0':`${state.ratios[i]||100/state.count} 1 0`);qs('select',p).value=safe(state.roles[i]);});splits.forEach((s,i)=>{s.hidden=fullscreenSlot!==null||i>=state.count-1;s.setAttribute('aria-orientation',state.direction==='rows'?'horizontal':'vertical');});qs('#columns').setAttribute('aria-pressed',String(state.direction==='columns'));qs('#rows').setAttribute('aria-pressed',String(state.direction==='rows'));qs('#two').setAttribute('aria-pressed',String(state.count===2));qs('#three').setAttribute('aria-pressed',String(state.count===3));visibleFrames();save();}
+    function setRatios(index,delta){const a=state.ratios[index],b=state.ratios[index+1],total=a+b,next=Math.max(12,Math.min(total-12,a+delta));state.ratios[index]=next;state.ratios[index+1]=total-next;state.sizes[state.count]=[...state.ratios];apply();}
+    function beginDrag(e,index){e.preventDefault();const row=ws.classList.contains('rows')||innerWidth<=720,rect=ws.getBoundingClientRect(),start=row?e.clientY:e.clientX,size=row?rect.height:rect.width,a=state.ratios[index],b=state.ratios[index+1],total=a+b;e.currentTarget.setPointerCapture?.(e.pointerId);const move=ev=>{const next=Math.max(12,Math.min(total-12,a+((row?ev.clientY:ev.clientX)-start)/size*100));state.ratios[index]=next;state.ratios[index+1]=total-next;state.sizes[state.count]=[...state.ratios];apply();};const end=()=>{window.removeEventListener('pointermove',move);window.removeEventListener('pointerup',end);};window.addEventListener('pointermove',move);window.addEventListener('pointerup',end);}
+    function switchCount(count){state.sizes[state.count]=normalize(state.ratios,state.count);state.count=count;state.ratios=normalize(state.sizes[count],count);apply();}
+    qsa('.splitter').forEach((s,i)=>{s.addEventListener('pointerdown',e=>beginDrag(e,i));s.addEventListener('keydown',e=>{if(!['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(e.key))return;e.preventDefault();setRatios(i,['ArrowLeft','ArrowUp'].includes(e.key)?-3:3);});});
+    qsa('.agent-select').forEach((sel,i)=>sel.addEventListener('change',()=>{const agent=safe(sel.value);state.roles[i]=agent;setFrame(panes[i],agent);save();}));
+    qsa('.reconnect').forEach((b,i)=>b.addEventListener('click',()=>setFrame(panes[i],safe(state.roles[i]))));
+    qsa('.expand').forEach((b,i)=>b.addEventListener('click',()=>{fullscreenSlot=fullscreenSlot===i?null:i;app.classList.toggle('fullscreen',fullscreenSlot!==null);qsa('.expand').forEach((x,n)=>{x.textContent=fullscreenSlot===n?'⤢':'⛶';x.setAttribute('aria-label',fullscreenSlot===n?'전체 화면 닫기':`슬롯 ${n+1} 전체 화면`);});apply();}));
+    window.addEventListener('keydown',e=>{if(e.key==='Escape'&&fullscreenSlot!==null){fullscreenSlot=null;app.classList.remove('fullscreen');qsa('.expand').forEach((x,i)=>{x.textContent='⛶';x.setAttribute('aria-label',`슬롯 ${i+1} 전체 화면`);});apply();}});
+    qs('#columns').onclick=()=>{state.direction='columns';apply();};qs('#rows').onclick=()=>{state.direction='rows';apply();};qs('#two').onclick=()=>switchCount(2);qs('#three').onclick=()=>switchCount(3);qs('#reset').onclick=()=>{state=fresh();fullscreenSlot=null;app.classList.remove('fullscreen');apply();};
+    apply();
+  })();
+  </script>
+</body>
+</html>
